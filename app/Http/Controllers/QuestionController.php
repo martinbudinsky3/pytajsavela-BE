@@ -10,6 +10,7 @@ use App\Models\Image;
 use App\Models\Question;
 use App\Services\ImageService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
@@ -29,25 +30,27 @@ class QuestionController extends Controller
     }
 
     public function store(QuestionPostRequest $request) {
-        // save question to DB
-        $question = Question::create([
-                        'title' => $request->title,
-                        'body' => $request->body,
-                        'user_id' => auth()->id()
-                    ]);
+        DB::transaction(function() use ($request, &$question) {
+            // save question to DB
+            $question = Question::create([
+                            'title' => $request->title,
+                            'body' => $request->body,
+                            'user_id' => auth()->id()
+                        ]);
 
-        // save tags-question relationship in pivot table
-        $question->tags()->attach($request->tags);
+            // save tags-question relationship in pivot table
+            $question->tags()->attach($request->tags);
 
-        // save images to DB
-        $imagesIds = collect([]);
-        foreach($request->file('images') as $uploadedImage) {
-            $imageId = $this->imageService->store($uploadedImage);
-            $imagesIds->push($imageId);
-        }
+            // save images to DB
+            $imagesIds = collect([]);
+            foreach($request->file('images') as $uploadedImage) {
+                $imageId = $this->imageService->store($uploadedImage);
+                $imagesIds->push($imageId);
+            }
 
-        // save images-question relationship in pivot table
-        $question->images()->attach($imagesIds);
+            // save images-question relationship in pivot table
+            $question->images()->attach($imagesIds);
+        });
 
         return response()->json(['id' => $question->id], 201);
     }
@@ -66,20 +69,25 @@ class QuestionController extends Controller
         $question->title = $request->title;
         $question->body = $request->body;
 
-        $question->tags()->detach($request->deleted_tags);
-        $question->tags()->attach($request->tags);
+        DB::transaction(function() use ($request, $question) {
+            // save image with updated fields
+            $question->save();
 
-        Image::destroy($request->deleted_images);
+            $question->tags()->detach($request->deleted_tags);
+            $question->tags()->attach($request->tags);
 
-        // save images to DB
-        $imagesIds = collect([]);
-        foreach((array)$request->file('images') as $uploadedImage) {
-            $imageId = $this->imageService->store($uploadedImage);
-            $imagesIds->push($imageId);
-        }
+            Image::destroy($request->deleted_images);
 
-        // save images-question relationship in pivot table
-        $question->images()->attach($imagesIds);
+            // save images to DB
+            $imagesIds = collect([]);
+            foreach((array)$request->file('images') as $uploadedImage) {
+                $imageId = $this->imageService->store($uploadedImage);
+                $imagesIds->push($imageId);
+            }
+
+            // save images-question relationship in pivot table
+            $question->images()->attach($imagesIds);
+        });
 
         return response()->json(null, 204);
     }
@@ -92,11 +100,13 @@ class QuestionController extends Controller
             return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
         }
 
-        // delete question's images
-        Image::destroy($question->images()->pluck('image_id'));
+        DB::transaction(function() use ($question) {
+            // delete question's images
+            Image::destroy($question->images()->pluck('image_id'));
 
-        // delete question
-        $question->delete();
+            // delete question
+            $question->delete();
+        });
 
         return response()->json(null, 204);
     }
