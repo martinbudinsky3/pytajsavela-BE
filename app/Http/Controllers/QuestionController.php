@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\QuestionPostRequest;
+use App\Http\Requests\QuestionPutRequest;
 use Illuminate\Support\Facades\Log;
 use App\Models\Image;
 use App\Models\Question;
 use App\Services\ImageService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class QuestionController extends Controller
 {
@@ -54,11 +56,48 @@ class QuestionController extends Controller
 
     }
 
-    public function update(Request $request, $id) {
+    public function update(QuestionPutRequest $request, $id) {
+        try {
+            $question = Question::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
+        }
 
+        $question->title = $request->title;
+        $question->body = $request->body;
+
+        $question->tags()->detach($request->deleted_tags);
+        $question->tags()->attach($request->tags);
+
+        Image::destroy($request->deleted_images);
+
+        // save images to DB
+        $imagesIds = collect([]);
+        foreach((array)$request->file('images') as $uploadedImage) {
+            $imageId = $this->imageService->store($uploadedImage);
+            $imagesIds->push($imageId);
+        }
+
+        // save images-question relationship in pivot table
+        $question->images()->attach($imagesIds);
+
+        return response()->json(null, 204);
     }
 
     public function destroy($id) {
+        // check if question exists
+        try {
+            $question = Question::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
+        }
 
+        // delete question's images
+        Image::destroy($question->images()->pluck('image_id'));
+
+        // delete question
+        $question->delete();
+
+        return response()->json(null, 204);
     }
 }
