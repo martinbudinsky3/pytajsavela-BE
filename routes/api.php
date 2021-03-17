@@ -44,8 +44,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     Route::group(['prefix' => 'tags'], function () {
-        Route::get('/', [QuestionController::class, 'index']);
-        Route::get('{id}/questions', [QuestionController::class, 'indexQuestions']);
+        Route::get('/', [TagController::class, 'index']);
+        Route::get('{id}/questions', [TagController::class, 'indexQuestions']);
     });
 
     Route::group(['prefix' => 'users/{id}'], function () {
