@@ -17,4 +17,28 @@ class Answer extends Model
     protected $fillable = [
         'body', 'user_id', 'question_id'
     ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'user_id',
+        'question_id',
+        'updated_at',
+        'pivot'
+    ];
+
+    public function author() {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function question() {
+        return $this->belongsTo(Question::class);
+    }
+
+    public function images() {
+        return $this->belongsToMany(Image::class, 'answer_images');
+    }
 }

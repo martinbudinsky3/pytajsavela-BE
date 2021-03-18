@@ -20,7 +20,7 @@ class ImageService
         $base64data = stream_get_contents($image->content);
         $image = base64_decode($base64data);
         
-        return response($image, 200)->header('Content-Type', 'application/octet-stream');
+        return $image;
     }
 
     /**

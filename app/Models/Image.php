@@ -19,4 +19,14 @@ class Image extends Model
     protected $fillable = [
         'content'
     ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'content',
+        'pivot'
+    ];
 }

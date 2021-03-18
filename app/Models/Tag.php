@@ -20,6 +20,15 @@ class Tag extends Model
         'name',
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'pivot',
+    ];
+
     public function questions() {
         return $this->belongsToMany(Question::class);
     }

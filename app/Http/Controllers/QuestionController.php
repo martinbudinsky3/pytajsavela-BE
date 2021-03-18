@@ -26,7 +26,23 @@ class QuestionController extends Controller
     }
 
     public function show($id) {
+        $question = Question::with([
+                'author' => function($query) {
+                    return $query->select('id', 'name');
+                }, 
+                'answers.images', 
+                'answers.author' => function($query) {
+                    return $query->select('id', 'name');
+                }, 
+                'images', 
+                'tags'
+            ])->where('id', $id)->first();
 
+        if(!$question) {
+            return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
+        }
+
+        return response()->json($question, 200);
     }
 
     public function store(QuestionPostRequest $request) {
@@ -42,14 +58,11 @@ class QuestionController extends Controller
             $question->tags()->attach($request->tags);
 
             // save images to DB
-            $imagesIds = collect([]);
             foreach($request->file('images') as $uploadedImage) {
                 $imageId = $this->imageService->store($uploadedImage);
-                $imagesIds->push($imageId);
+                // save images-question relationship in pivot table
+                $question->images()->attach($imageId);
             }
-
-            // save images-question relationship in pivot table
-            $question->images()->attach($imagesIds);
         });
 
         return response()->json(['id' => $question->id], 201);
@@ -73,20 +86,19 @@ class QuestionController extends Controller
             // save image with updated fields
             $question->save();
 
+            // delete tags-question relationship
             $question->tags()->detach($request->deleted_tags);
+            // save tags-question relationship
             $question->tags()->attach($request->tags);
 
+            // delete images
             Image::destroy($request->deleted_images);
-
-            // save images to DB
-            $imagesIds = collect([]);
+            // save new images to DB
             foreach((array)$request->file('images') as $uploadedImage) {
                 $imageId = $this->imageService->store($uploadedImage);
-                $imagesIds->push($imageId);
+                // save images-question relationship in pivot table
+                $question->images()->attach($imageId);
             }
-
-            // save images-question relationship in pivot table
-            $question->images()->attach($imagesIds);
         });
 
         return response()->json(null, 204);
