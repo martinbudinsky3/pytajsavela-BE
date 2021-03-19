@@ -58,7 +58,7 @@ class QuestionController extends Controller
             $question->tags()->attach($request->tags);
 
             // save images to DB
-            foreach($request->file('images') as $uploadedImage) {
+            foreach((array)$request->file('images') as $uploadedImage) {
                 $imageId = $this->imageService->store($uploadedImage);
                 // save images-question relationship in pivot table
                 $question->images()->attach($imageId);
@@ -78,6 +78,8 @@ class QuestionController extends Controller
         } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
         }
+
+        $this->authorize('update', $question);
 
         $question->title = $request->title;
         $question->body = $request->body;
@@ -111,6 +113,8 @@ class QuestionController extends Controller
         } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
         }
+
+        $this->authorize('delete', $question);
 
         DB::transaction(function() use ($question) {
             // delete question's images
