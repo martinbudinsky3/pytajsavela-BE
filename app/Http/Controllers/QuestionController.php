@@ -36,7 +36,9 @@ class QuestionController extends Controller
                 }, 
                 'images', 
                 'tags'
-            ])->where('id', $id)->first();
+            ])
+            ->where('id', $id)
+            ->first();
 
         if(!$question) {
             return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);

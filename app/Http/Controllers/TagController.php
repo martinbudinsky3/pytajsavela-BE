@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,15 +16,12 @@ class TagController extends Controller
         $offset = ($page - 1) * $recordsPerPage;
         $search = request('search', '');
 
-        $tags = DB::table('tags')
-             ->select('tags.id', 'name', DB::raw('count(question_tags.tag_id) as questions_count'))
-             ->leftJoin('question_tags', 'tags.id', '=', 'question_tags.tag_id')
-             ->where('name', 'like', $search.'%')
-             ->groupBy('tags.id')
-             ->orderBy('tags.id', 'desc')
-             ->offset($offset)
-             ->limit($recordsPerPage)
-             ->get();
+        $tags = Tag::withCount('questions')
+            ->where('name', 'like', $search.'%')
+            ->orderBy('id', 'asc')
+            ->skip($offset)
+            ->take($recordsPerPage)
+            ->get();
 
         $count = $search == '' ? Tag::count() : Tag::where('name', 'like', $search.'%')->count();
 
@@ -32,6 +30,38 @@ class TagController extends Controller
     }
 
     public function indexQuestions($id) {
-        
+        try {
+            $tag = Tag::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'Tag with id ' . $id . ' does not exist.'], 404);
+        }
+
+        $recordsPerPage = 10;
+        $page = request('page', 1);
+        $offset = ($page - 1) * $recordsPerPage;
+
+        // getting ids of questions that have requested tag
+        $questionsIds = Question::with('tags')
+            ->whereHas('tags', function($query) use($id) {
+                            $query->where('tags.id', $id);
+                        })
+            ->pluck('id');
+
+        // getting requested page of list of questions that have requested tag with their info
+        $questions = Question::with([
+                'tags', 
+                'author' => function($query) {
+                    return $query->select('id', 'name');
+                }
+            ])
+            ->withCount('answers')
+            ->whereIn('id', $questionsIds)
+            ->skip($offset)
+            ->take($recordsPerPage)
+            ->get();
+
+        $count = $questionsIds->count();
+
+        return response()->json(['count' => $count, 'questions' => $questions], 200);
     }
 }
