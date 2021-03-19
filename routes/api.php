@@ -23,17 +23,17 @@ use Illuminate\Support\Facades\Route;
 
 //Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']); // DONE
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     
     Route::group(['prefix' => 'questions'], function () {
         Route::get('/', [QuestionController::class, 'index']);
-        Route::post('/', [QuestionController::class, 'store']);
-        Route::get('{id}/', [QuestionController::class, 'show']);
+        Route::post('/', [QuestionController::class, 'store']); // DONE
+        Route::get('{id}/', [QuestionController::class, 'show']); // DONE
         Route::get('{id}/edit-form/', [QuestionController::class, 'edit']);
-        Route::put('{id}/', [QuestionController::class, 'update']);
-        Route::delete('{id}/', [QuestionController::class, 'destroy']);
+        Route::put('{id}/', [QuestionController::class, 'update']); // DONE
+        Route::delete('{id}/', [QuestionController::class, 'destroy']); // DONE
     });
 
     Route::group(['prefix' => 'answers'], function () {
@@ -44,8 +44,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     Route::group(['prefix' => 'tags'], function () {
-        Route::get('/', [TagController::class, 'index']);
-        Route::get('{id}/questions', [TagController::class, 'indexQuestions']);
+        Route::get('/', [TagController::class, 'index']); // DONE
+        Route::get('{id}/questions', [TagController::class, 'indexQuestions']); //DONE
     });
 
     Route::group(['prefix' => 'users/{id}'], function () {
@@ -54,7 +54,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/answers', [UserController::class, 'indexAnswers']);
     });
 
-    Route::get('/images/{id}', [ImageController::class, 'show']);
+    Route::get('/images/{id}', [ImageController::class, 'show']); // DONE
 
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']); // DONE
 });
