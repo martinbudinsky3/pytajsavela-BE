@@ -34,10 +34,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('{id}/edit-form/', [QuestionController::class, 'edit']);
         Route::put('{id}/', [QuestionController::class, 'update']); // DONE
         Route::delete('{id}/', [QuestionController::class, 'destroy']); // DONE
+        Route::post('{id}/answers/', [AnswerController::class, 'store']);
     });
 
     Route::group(['prefix' => 'answers'], function () {
-        Route::post('/', [AnswerController::class, 'store']);
         Route::get('{id}/edit-form/', [AnswerController::class, 'edit']);
         Route::put('{id}/', [AnswerController::class, 'update']);
         Route::delete('{id}/', [AnswerController::class, 'destroy']);
