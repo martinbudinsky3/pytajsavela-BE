@@ -18,7 +18,7 @@ class TagController extends Controller
 
         $tags = Tag::withCount('questions')
             ->where('name', 'like', $search.'%')
-            ->orderBy('id', 'asc')
+            ->orderBy('name', 'asc')
             ->skip($offset)
             ->take($recordsPerPage)
             ->get();
@@ -56,6 +56,7 @@ class TagController extends Controller
             ])
             ->withCount('answers')
             ->whereIn('id', $questionsIds)
+            ->orderBy('created_at', 'desc')
             ->skip($offset)
             ->take($recordsPerPage)
             ->get();

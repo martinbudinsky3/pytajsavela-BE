@@ -22,7 +22,26 @@ class QuestionController extends Controller
     }
 
     public function index() {
+        $recordsPerPage = 10;
+        $page = request('page', 1);
+        $offset = ($page - 1) * $recordsPerPage;
 
+        // getting requested page of list of questions
+        $questions = Question::with([
+                'tags', 
+                'author' => function($query) {
+                    return $query->select('id', 'name');
+                }
+            ])
+            ->withCount('answers')
+            ->orderBy('created_at', 'desc')
+            ->skip($offset)
+            ->take($recordsPerPage)
+            ->get();
+
+        $count = Question::count();
+
+        return response()->json(['count' => $count, 'questions' => $questions], 200);
     }
 
     public function show($id) {
