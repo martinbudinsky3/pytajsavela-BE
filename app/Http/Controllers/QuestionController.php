@@ -90,7 +90,15 @@ class QuestionController extends Controller
     }
 
     public function edit($id) {
+        $question = Question::with(['tags'])
+            ->where('id', $id)
+            ->first();
 
+        if(!$question) {
+            return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
+        }
+
+        return response()->json($question, 200);
     }
 
     public function update(QuestionPutRequest $request, $id) {

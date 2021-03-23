@@ -28,10 +28,10 @@ Route::post('/login', [AuthController::class, 'login']); // DONE
 Route::group(['middleware' => ['auth:sanctum']], function () {
     
     Route::group(['prefix' => 'questions'], function () {
-        Route::get('/', [QuestionController::class, 'index']);
+        Route::get('/', [QuestionController::class, 'index']); // DONE
         Route::post('/', [QuestionController::class, 'store']); // DONE
         Route::get('{id}/', [QuestionController::class, 'show']); // DONE
-        Route::get('{id}/edit-form/', [QuestionController::class, 'edit']);
+        Route::get('{id}/edit-form/', [QuestionController::class, 'edit']); // DONE
         Route::put('{id}/', [QuestionController::class, 'update']); // DONE
         Route::delete('{id}/', [QuestionController::class, 'destroy']); // DONE
         Route::post('{id}/answers/', [AnswerController::class, 'store']);
