@@ -26,6 +26,7 @@ class AnswerController extends Controller
     }
 
     public function show($id) {
+
         $answer = Answer::with([
                 'author' => function($query) {
                     return $query->select('id', 'name');
@@ -48,6 +49,15 @@ class AnswerController extends Controller
     }
 
     public function store(AnswerPostRequest $request, $question_id) {
+
+        // if no body was given in the request 
+        // return message with status code 422
+        if (empty($request->body)) {
+            return response()->json(['message' => 'Request does not pass valiation.'], 422);
+        }
+
+        // when there is no question with given id
+        // return message with status code 404
         try {
             $question = Question::findOrFail($question_id);
         } catch(ModelNotFoundException $exception) {
@@ -79,10 +89,14 @@ class AnswerController extends Controller
 
     public function update(AnswerPutRequest $request, $id) {
 
+        // if no body was given in the request 
+        // return message with status code 422
         if (empty($request->body)) {
             return response()->json(['message' => 'Request does not pass valiation.'], 422);
         }
-        
+
+        // when there is no question with given id
+        // return message with status code 404
         try {
             $answer = Answer::findOrFail($id);
         } catch(ModelNotFoundException $exception) {
