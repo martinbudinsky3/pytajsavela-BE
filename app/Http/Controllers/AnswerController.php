@@ -47,12 +47,18 @@ class AnswerController extends Controller
         return response()->json($answer, 200);
     }
 
-    public function store(AnswerPostRequest $request) {
+    public function store(AnswerPostRequest $request, $question_id) {
+        try {
+            $question = Question::findOrFail($question_id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'Question with id ' . $question_id . ' does not exist.'], 404);
+        }
+
         DB::transaction(function() use ($request, &$answer) {
             // save answer to DB
             $answer = Answer::create([
                             'body' => $request->body,
-                            'question_id' => $request->question_id,
+                            'question_id' => $question_id,
                             'user_id' => auth()->id(),
                         ]);
 
@@ -72,6 +78,11 @@ class AnswerController extends Controller
     }
 
     public function update(AnswerPutRequest $request, $id) {
+
+        if (empty($request->body)) {
+            return response()->json(['message' => 'Request does not pass valiation.'], 422);
+        }
+        
         try {
             $answer = Answer::findOrFail($id);
         } catch(ModelNotFoundException $exception) {
