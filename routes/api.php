@@ -38,7 +38,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     Route::group(['prefix' => 'answers'], function () {
-        Route::get('{id}/edit-form/', [AnswerController::class, 'edit']);
+        Route::get('{id}/edit-form/', [AnswerController::class, 'edit']); // DONE
         Route::put('{id}/', [AnswerController::class, 'update']);
         Route::delete('{id}/', [AnswerController::class, 'destroy']);
     });
@@ -51,7 +51,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::group(['prefix' => 'users/{id}'], function () {
         Route::get('/', [UserController::class, 'show']); // DONE
         Route::get('/questions', [UserController::class, 'indexQuestions']); // DONE
-        Route::get('/answers', [UserController::class, 'indexAnswers']);
+        Route::get('/answers', [UserController::class, 'indexAnswers']); // DONE
     });
 
     Route::get('/images/{id}', [ImageController::class, 'show']); // DONE

@@ -21,10 +21,6 @@ class AnswerController extends Controller
         $this->imageService = $imageService;
     }
 
-    public function index() {
-
-    }
-
     public function show($id) {
 
         $answer = Answer::with([
@@ -84,7 +80,15 @@ class AnswerController extends Controller
     }
 
     public function edit($id) {
+        $answer = Answer::select('id', 'body')
+            ->where('id', $id)
+            ->first();
 
+        if(!$answer) {
+            return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
+        }
+
+        return response()->json($answer, 200);
     }
 
     public function update(AnswerPutRequest $request, $id) {

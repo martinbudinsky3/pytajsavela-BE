@@ -61,7 +61,7 @@ class UserController extends Controller
 
         $count = $questionsIds->count();
 
-        return response()->json(['count' => $count, 'questions' => $questions], 200);
+        return response()->json(['user' => $user, 'count' => $count, 'questions' => $questions], 200);
     }
 
     public function indexAnswers($id) {
