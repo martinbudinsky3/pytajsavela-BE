@@ -49,8 +49,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     Route::group(['prefix' => 'users/{id}'], function () {
-        Route::get('/', [UserController::class, 'show']);
-        Route::get('/questions', [UserController::class, 'indexQuestions']);
+        Route::get('/', [UserController::class, 'show']); // DONE
+        Route::get('/questions', [UserController::class, 'indexQuestions']); // DONE
         Route::get('/answers', [UserController::class, 'indexAnswers']);
     });
 
