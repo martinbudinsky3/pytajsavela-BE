@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Question;
+use App\Models\Answer;
 
 class UserController extends Controller
 {
@@ -62,6 +63,36 @@ class UserController extends Controller
     }
 
     public function indexAnswers($id) {
-        
+        try {
+            $user = User::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'User with id ' . $id . ' does not exist.'], 404);
+        }
+
+        $recordsPerPage = 10;
+        $page = request('page', 1);
+        $offset = ($page - 1) * $recordsPerPage;
+
+        // getting ids of answers from the user
+        $answersIds = Answer::with('author')
+            ->whereHas('author', function($query) use($id) {
+                            $query->where('id', $id);
+                        })
+            ->pluck('id');
+
+        // getting requested page of list of answers from the user
+        $answers = Answer::with([
+                'author' => function($query) {
+                    return $query->select('id', 'name');
+                }
+            ])
+            ->orderBy('created_at', 'desc')
+            ->skip($offset)
+            ->take($recordsPerPage)
+            ->get();
+
+        $count = $answersIds->count();
+
+        return response()->json(['count' => $count, 'answers' => $answers], 200);
     }
 }
