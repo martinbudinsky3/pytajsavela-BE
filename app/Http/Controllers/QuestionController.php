@@ -48,6 +48,9 @@ class QuestionController extends Controller
         $question = Question::with([
                 'author' => function($query) {
                     return $query->select('id', 'name');
+                },
+                'answers' => function($query) {
+                    return $query->orderBy('created_at', 'asc');
                 }, 
                 'answers.images', 
                 'answers.author' => function($query) {
@@ -91,6 +94,7 @@ class QuestionController extends Controller
 
     public function edit($id) {
         $question = Question::with(['tags'])
+            ->select('id', 'title', 'body')
             ->where('id', $id)
             ->first();
 
@@ -114,22 +118,13 @@ class QuestionController extends Controller
         $question->body = $request->body;
 
         DB::transaction(function() use ($request, $question) {
-            // save image with updated fields
+            // save question with updated fields
             $question->save();
 
             // delete tags-question relationship
             $question->tags()->detach($request->deleted_tags);
             // save tags-question relationship
             $question->tags()->attach($request->tags);
-
-            // delete images
-            Image::destroy($request->deleted_images);
-            // save new images to DB
-            foreach((array)$request->file('images') as $uploadedImage) {
-                $imageId = $this->imageService->store($uploadedImage);
-                // save images-question relationship in pivot table
-                $question->images()->attach($imageId);
-            }
         });
 
         return response()->json(null, 204);

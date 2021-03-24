@@ -34,17 +34,12 @@ class QuestionPutRequest extends FormRequest
             'deleted_tags.*' => 'integer',
             'tags' => 'nullable|array',
             'tags.*' => 'integer|exists:tags,id',
-            'deleted_images' => 'nullable|array',
-            'deleted_images.*' => 'integer',
-            'images' => 'nullable|array',
-            'images.*' => 'image'
         ];
     }
 
     public function messages() {
         return [
-            'tags.*.exists' => 'Each tag must already exists.',
-            'images.*.image' => 'Each uploaded file must be an image.'
+            'tags.*.exists' => 'Each tag must already exist.',
         ];
     }
 
