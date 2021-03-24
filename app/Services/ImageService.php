@@ -15,9 +15,9 @@ class ImageService
      * Get image by id
      */
     public function get($id) {
-        $image = Image::findOrFail(45);
+        $imageModel = Image::findOrFail($id);
         
-        $base64data = stream_get_contents($image->content);
+        $base64data = stream_get_contents($imageModel->content);
         $image = base64_decode($base64data);
         
         return $image;
@@ -28,7 +28,7 @@ class ImageService
      */
     public function store($image) {        
         $imageBytes = file_get_contents($image->getRealPath());
-        $base64image = base64_encode($image);
+        $base64image = base64_encode($imageBytes);
 
         $savedImage = Image::create([
                         'content'=> $base64image

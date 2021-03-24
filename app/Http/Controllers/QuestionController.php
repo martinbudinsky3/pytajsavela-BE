@@ -33,6 +33,7 @@ class QuestionController extends Controller
                     return $query->select('id', 'name');
                 }
             ])
+            ->select('id', 'title', 'created_at', 'user_id')
             ->withCount('answers')
             ->orderBy('created_at', 'desc')
             ->skip($offset)

@@ -54,6 +54,7 @@ class TagController extends Controller
                     return $query->select('id', 'name');
                 }
             ])
+            ->select('id', 'title', 'created_at', 'user_id')
             ->withCount('answers')
             ->whereIn('id', $questionsIds)
             ->orderBy('created_at', 'desc')
@@ -63,6 +64,6 @@ class TagController extends Controller
 
         $count = $questionsIds->count();
 
-        return response()->json(['count' => $count, 'questions' => $questions], 200);
+        return response()->json(['tag' => $tag, 'count' => $count, 'questions' => $questions], 200);
     }
 }
