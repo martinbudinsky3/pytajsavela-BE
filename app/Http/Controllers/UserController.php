@@ -50,6 +50,7 @@ class UserController extends Controller
                     return $query->select('id', 'name');
                 }
             ])
+            ->select('id', 'title', 'created_at', 'user_id')
             ->withCount('answers')
             ->whereIn('id', $questionsIds)
             ->orderBy('created_at', 'desc')
@@ -86,6 +87,7 @@ class UserController extends Controller
                     return $query->select('id', 'name');
                 }
             ])
+            ->select('id', 'body', 'created_at', 'user_id')
             ->orderBy('created_at', 'desc')
             ->skip($offset)
             ->take($recordsPerPage)
