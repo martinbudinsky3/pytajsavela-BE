@@ -48,7 +48,8 @@ class UserController extends Controller
                 'tags', 
                 'author' => function($query) {
                     return $query->select('id', 'name');
-                }
+                },
+                'answers'
             ])
             ->select('id', 'title', 'created_at', 'user_id')
             ->withCount('answers')
@@ -74,27 +75,29 @@ class UserController extends Controller
         $page = request('page', 1);
         $offset = ($page - 1) * $recordsPerPage;
 
-        // getting ids of answers from the user
+        // getting ids of questions from the user
         $answersIds = Answer::with('author')
             ->whereHas('author', function($query) use($id) {
                             $query->where('id', $id);
                         })
             ->pluck('id');
-
-        // getting requested page of list of answers from the user
+        
+        // getting requested page of list of questions from the user
         $answers = Answer::with([
-                'author' => function($query) {
-                    return $query->select('id', 'name');
-                }
-            ])
-            ->select('id', 'body', 'created_at', 'user_id')
-            ->orderBy('created_at', 'desc')
-            ->skip($offset)
-            ->take($recordsPerPage)
-            ->get();
+            'author' => function($query) {
+                return $query->select('id', 'name');
+            },
+            'question'
+        ])
+        ->select('id', 'body', 'created_at', 'user_id', 'question_id')
+        ->whereIn('id', $answersIds)
+        ->orderBy('created_at', 'desc')
+        ->skip($offset)
+        ->take($recordsPerPage)
+        ->get();
 
         $count = $answersIds->count();
 
-        return response()->json(['count' => $count, 'answers' => $answers], 200);
+        return response()->json(['user' => $user, 'count' => $count, 'answers' => $answers], 200);
     }
 }
