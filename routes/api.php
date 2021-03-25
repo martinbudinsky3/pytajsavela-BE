@@ -34,7 +34,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('{id}/edit-form/', [QuestionController::class, 'edit']); // DONE
         Route::put('{id}/', [QuestionController::class, 'update']); // DONE
         Route::delete('{id}/', [QuestionController::class, 'destroy']); // DONE
-        Route::post('{id}/answers/', [AnswerController::class, 'store']);
+        Route::post('{id}/answers/', [AnswerController::class, 'store']); // DONE
     });
 
     Route::group(['prefix' => 'answers'], function () {

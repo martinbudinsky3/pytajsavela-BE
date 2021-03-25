@@ -8,6 +8,7 @@ use App\Http\Requests\AnswerPutRequest;
 use Illuminate\Support\Facades\Log;
 use App\Models\Image;
 use App\Models\Answer;
+use App\Models\Question;
 use App\Services\ImageService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,14 @@ class AnswerController extends Controller
         return response()->json($answer, 200);
     }
 
-    public function store(AnswerPostRequest $request, $question_id) {
+    public function store(AnswerPostRequest $request, $id) {
+        // when there is no question with given id
+        // return message with status code 404
+        try {
+            $question = Question::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
+        }
 
         // if no body was given in the request 
         // return message with status code 422
@@ -52,19 +60,11 @@ class AnswerController extends Controller
             return response()->json(['message' => 'Request does not pass valiation.'], 422);
         }
 
-        // when there is no question with given id
-        // return message with status code 404
-        try {
-            $question = Question::findOrFail($question_id);
-        } catch(ModelNotFoundException $exception) {
-            return response()->json(['message' => 'Question with id ' . $question_id . ' does not exist.'], 404);
-        }
-
-        DB::transaction(function() use ($request, &$answer) {
+        DB::transaction(function() use ($request, &$answer, $id) {
             // save answer to DB
             $answer = Answer::create([
                             'body' => $request->body,
-                            'question_id' => $question_id,
+                            'question_id' => $id,
                             'user_id' => auth()->id(),
                         ]);
 
