@@ -22,29 +22,6 @@ class AnswerController extends Controller
         $this->imageService = $imageService;
     }
 
-    public function show($id) {
-
-        $answer = Answer::with([
-                'author' => function($query) {
-                    return $query->select('id', 'name');
-                }, 
-                'question.tags', 
-                'question.images',
-                'question.author' => function($query) {
-                    return $query->select('id', 'name');
-                }, 
-                'images'
-            ])
-            ->where('id', $id)
-            ->first();
-
-        if(!$answer) {
-            return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
-        }
-
-        return response()->json($answer, 200);
-    }
-
     public function store(AnswerPostRequest $request, $id) {
         // when there is no question with given id
         // return message with status code 404
@@ -52,12 +29,6 @@ class AnswerController extends Controller
             $question = Question::findOrFail($id);
         } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'Question with id ' . $id . ' does not exist.'], 404);
-        }
-
-        // if no body was given in the request 
-        // return message with status code 422
-        if (empty($request->body)) {
-            return response()->json(['message' => 'Request does not pass valiation.'], 422);
         }
 
         DB::transaction(function() use ($request, &$answer, $id) {
@@ -91,13 +62,12 @@ class AnswerController extends Controller
         return response()->json($answer, 200);
     }
 
-    public function update(AnswerPutRequest $request, $id) {
+    public function update(Request $request, $id) {
 
-        // if no body was given in the request 
-        // return message with status code 422
-        if (empty($request->body)) {
-            return response()->json(['message' => 'Request does not pass valiation.'], 422);
-        }
+        // input validation
+        $request->validate([
+            'body' => 'required|string',
+        ]);
 
         // when there is no question with given id
         // return message with status code 404
@@ -107,21 +77,12 @@ class AnswerController extends Controller
             return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
         }
 
+        $this->authorize('update', $answer);
+
         $answer->body = $request->body;
 
-        DB::transaction(function() use ($request, $answer) {
-            // save image with updated fields
-            $answer->save();
-
-            // delete images
-            Image::destroy($request->deleted_images);
-            // save new images to DB
-            foreach((array)$request->file('images') as $uploadedImage) {
-                $imageId = $this->imageService->store($uploadedImage);
-                // save images-asnwer relationship in pivot table
-                $answer->images()->attach($imageId);
-            }
-        });
+        // save image with updated fields
+        $answer->save();
 
         return response()->json(null, 204);
     }
@@ -133,6 +94,8 @@ class AnswerController extends Controller
         } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
         }
+
+        $this->authorize('delete', $answer);
 
         DB::transaction(function() use ($answer) {
             // delete answer's images

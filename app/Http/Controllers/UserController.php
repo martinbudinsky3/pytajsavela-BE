@@ -10,15 +10,9 @@ use App\Models\Answer;
 class UserController extends Controller
 {
     public function show($id) {
-
-        $user = User::with([
-            'questions',
-            'answers'
-        ])
-        ->where('id', $id)
-        ->first();
-
-        if(!$user) {
+        try {
+            $user = User::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'User with id ' . $id . ' does not exist.'], 404);
         }
 
@@ -32,10 +26,6 @@ class UserController extends Controller
             return response()->json(['message' => 'User with id ' . $id . ' does not exist.'], 404);
         }
 
-        $recordsPerPage = 10;
-        $page = request('page', 1);
-        $offset = ($page - 1) * $recordsPerPage;
-
         // getting ids of questions from the user
         $questionsIds = Question::with('author')
             ->whereHas('author', function($query) use($id) {
@@ -46,22 +36,20 @@ class UserController extends Controller
         // getting requested page of list of questions from the user
         $questions = Question::with([
                 'tags', 
-                'author' => function($query) {
-                    return $query->select('id', 'name');
-                },
-                'answers'
             ])
-            ->select('id', 'title', 'created_at', 'user_id')
+            ->select('id', 'title', 'created_at')
             ->withCount('answers')
             ->whereIn('id', $questionsIds)
             ->orderBy('created_at', 'desc')
-            ->skip($offset)
-            ->take($recordsPerPage)
             ->get();
 
         $count = $questionsIds->count();
 
-        return response()->json(['user' => $user, 'count' => $count, 'questions' => $questions], 200);
+        return response()->json([
+                'id' => $user->id,
+                'name' => $user->name, 
+                'questions' => $questions
+            ], 200);
     }
 
     public function indexAnswers($id) {
@@ -71,10 +59,6 @@ class UserController extends Controller
             return response()->json(['message' => 'User with id ' . $id . ' does not exist.'], 404);
         }
 
-        $recordsPerPage = 10;
-        $page = request('page', 1);
-        $offset = ($page - 1) * $recordsPerPage;
-
         // getting ids of questions from the user
         $answersIds = Answer::with('author')
             ->whereHas('author', function($query) use($id) {
@@ -82,22 +66,20 @@ class UserController extends Controller
                         })
             ->pluck('id');
         
-        // getting requested page of list of questions from the user
+        // getting list of answers from the user
         $answers = Answer::with([
-            'author' => function($query) {
-                return $query->select('id', 'name');
-            },
-            'question'
-        ])
-        ->select('id', 'body', 'created_at', 'user_id', 'question_id')
-        ->whereIn('id', $answersIds)
-        ->orderBy('created_at', 'desc')
-        ->skip($offset)
-        ->take($recordsPerPage)
-        ->get();
+                'question' => function($query) {
+                    return $query->select('id', 'title');
+                }
+            ])
+            ->whereIn('id', $answersIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $count = $answersIds->count();
-
-        return response()->json(['user' => $user, 'count' => $count, 'answers' => $answers], 200);
+        return response()->json([
+                'id' => $user->id,
+                'name' => $user->name, 
+                'answers' => $answers
+            ], 200);
     }
 }

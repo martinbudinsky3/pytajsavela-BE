@@ -15,12 +15,16 @@ class ImageService
      * Get image by id
      */
     public function get($id) {
-        $imageModel = Image::findOrFail($id);
+        try {
+            $image = Image::findOrFail($id);
+        } catch(ModelNotFoundException $exception) {
+            return null;
+        }
         
-        $base64data = stream_get_contents($imageModel->content);
-        $image = base64_decode($base64data);
+        $base64data = stream_get_contents($image->content);
+        $imageBytes = base64_decode($base64data);
         
-        return $image;
+        return $imageBytes;
     }
 
     /**

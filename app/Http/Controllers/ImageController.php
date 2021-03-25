@@ -18,7 +18,9 @@ class ImageController extends Controller
     public function show($id) {
         $image = $this->imageService->get($id);
 
-        Log::debug($image);
+        if(!$image) {
+            return response()->json(['message' => 'Image with id ' . $id . ' does not exist.'], 404);
+        }
 
         return response($image, 200)->header('Content-Type', 'application/octet-stream');
     }
