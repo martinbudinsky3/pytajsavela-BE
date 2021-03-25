@@ -107,8 +107,6 @@ class AnswerController extends Controller
             return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
         }
 
-        $this->authorize('update', $answer);
-
         $answer->body = $request->body;
 
         DB::transaction(function() use ($request, $answer) {
@@ -135,8 +133,6 @@ class AnswerController extends Controller
         } catch(ModelNotFoundException $exception) {
             return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
         }
-
-        $this->authorize('delete', $answer);
 
         DB::transaction(function() use ($answer) {
             // delete answer's images
