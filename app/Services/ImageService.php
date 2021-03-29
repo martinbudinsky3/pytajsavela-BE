@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
 use Intervention\Image\ImageManagerStatic as ImgService;
 use App\Models\Image;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 
 
