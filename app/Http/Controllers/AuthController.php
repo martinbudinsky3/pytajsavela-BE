@@ -31,12 +31,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $attr = $request->validate([
-            'email' => 'required|string|email|',
-            'password' => 'required|string|min:8'
-        ]);
-
-        if (!Auth::attempt($attr)) {
+        if (!Auth::attempt($request->input())) {
             return response()->json([
                 'message' => 'Incorrect credentials'
             ], 401);
@@ -50,7 +45,6 @@ class AuthController extends Controller
 
     public function logout()
     {
-        //auth()->user()->tokens()->delete();
         auth()->user()->currentAccessToken()->delete();
 
         return response()->json(null, 204);
