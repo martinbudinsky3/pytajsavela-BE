@@ -50,7 +50,8 @@ class AuthController extends Controller
 
     public function logout()
     {
-        auth()->user()->tokens()->delete();
+        //auth()->user()->tokens()->delete();
+        auth()->user()->currentAccessToken()->delete();
 
         return response()->json(null, 204);
     }

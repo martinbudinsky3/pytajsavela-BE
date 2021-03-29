@@ -143,8 +143,8 @@ class QuestionController extends Controller
 
         DB::transaction(function() use ($question) {
             // delete question's images
-            Image::destroy($question->images()->pluck('image_id'));
-
+            $question->images()->delete();
+            
             // delete question
             $question->delete();
         });

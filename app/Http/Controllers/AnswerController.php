@@ -99,8 +99,8 @@ class AnswerController extends Controller
 
         DB::transaction(function() use ($answer) {
             // delete answer's images
-            Image::destroy($answer->images()->pluck('image_id'));
-
+            $answer->images()->delete();
+            
             // delete answer
             $answer->delete();
         });
