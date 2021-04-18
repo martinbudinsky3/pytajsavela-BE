@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class TagController extends Controller
 {
     public function index() {
-        $recordsPerPage = 18;
+        $recordsPerPage = 30;
         $page = request('page', 1);
         $offset = ($page - 1) * $recordsPerPage;
         $search = request('search', '');
