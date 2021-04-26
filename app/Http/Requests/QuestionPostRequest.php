@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class QuestionPostRequest extends FormRequest
@@ -26,6 +27,7 @@ class QuestionPostRequest extends FormRequest
      */
     public function rules()
     {
+        Log::debug($this);
         return [
             'title' => 'required|string|max:255',
             'body' => 'required|string',
