@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,6 +26,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
+            'id' => $user->id,
 			'token' => $user->createToken('API Token')->plainTextToken
 		], 201);
     }
@@ -45,8 +47,24 @@ class AuthController extends Controller
 
     public function logout()
     {
+        Log::debug(auth()->user()->currentAccessToken()->id);
         auth()->user()->currentAccessToken()->delete();
 
+        return response()->json(null, 204);
+    }
+
+    public function storeFcm(Request $request) 
+    {
+        // input validation
+        $request->validate([
+            'token' => 'string|max:255',
+        ]);
+
+        DB::table('fcm_tokens')->insert([
+            'token' => $request->token,
+            'personal_access_token_id' => auth()->user()->currentAccessToken()->id
+        ]);
+        
         return response()->json(null, 204);
     }
 }

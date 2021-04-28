@@ -56,5 +56,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/images/{id}', [ImageController::class, 'show']); // DONE
 
+    Route::post('/fcm', [AuthController::class, 'storeFcm']);
     Route::post('/logout', [AuthController::class, 'logout']); // DONE
 });
