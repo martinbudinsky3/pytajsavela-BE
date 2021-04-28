@@ -12,6 +12,7 @@ use App\Models\Question;
 use App\Services\ImageService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use App\Events\AnswerCreated;
 
 class AnswerController extends Controller
 {
@@ -46,6 +47,9 @@ class AnswerController extends Controller
                 $answer->images()->attach($imageId);
             }
         });
+
+        // generate answer created event to notify question author
+        AnswerCreated::dispatch($answer);
 
         return response()->json(['id' => $answer->id], 201);
     }
