@@ -28,7 +28,7 @@ class QuestionController extends Controller
 
         // getting requested page of list of questions
         $questions = Question::with([
-                'tags', 
+                'tags',
                 'author' => function($query) {
                     return $query->select('id', 'name');
                 }
@@ -52,12 +52,12 @@ class QuestionController extends Controller
                 },
                 'answers' => function($query) {
                     return $query->orderBy('created_at', 'asc');
-                }, 
-                'answers.images', 
+                },
+                'answers.images',
                 'answers.author' => function($query) {
                     return $query->select('id', 'name');
-                }, 
-                'images', 
+                },
+                'images',
                 'tags'
             ])
             ->where('id', $id)
@@ -144,7 +144,7 @@ class QuestionController extends Controller
         DB::transaction(function() use ($question) {
             // delete question's images
             $question->images()->delete();
-            
+
             // delete question
             $question->delete();
         });

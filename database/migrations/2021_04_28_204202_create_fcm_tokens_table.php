@@ -16,9 +16,9 @@ class CreateFcmTokensTable extends Migration
         Schema::create('fcm_tokens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('personal_access_token_id')
-                    ->constrained()
-                    ->onDelete('cascade');
-            $table->string('token', 255)->nullable();
+                ->constrained()
+                ->onDelete('cascade');
+            $table->string('fcm_token', 255)->nullable();
         });
     }
 

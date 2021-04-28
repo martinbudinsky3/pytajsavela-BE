@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AnswerPostRequest;
 use App\Http\Requests\AnswerPutRequest;
 use Illuminate\Support\Facades\Log;
-use App\Models\Image;
 use App\Models\Answer;
 use App\Models\Question;
 use App\Services\ImageService;
@@ -40,6 +39,7 @@ class AnswerController extends Controller
                             'user_id' => auth()->id(),
                         ]);
 
+            Log::debug($answer->question->id);
             // save images to DB
             foreach((array)$request->file('images') as $uploadedImage) {
                 $imageId = $this->imageService->store($uploadedImage);
@@ -49,7 +49,9 @@ class AnswerController extends Controller
         });
 
         // generate answer created event to notify question author
-        AnswerCreated::dispatch($answer);
+        if($answer->question->author->id != auth()->id()) {
+            AnswerCreated::dispatch($answer);
+        }
 
         return response()->json(['id' => $answer->id], 201);
     }
@@ -104,7 +106,7 @@ class AnswerController extends Controller
         DB::transaction(function() use ($answer) {
             // delete answer's images
             $answer->images()->delete();
-            
+
             // delete answer
             $answer->delete();
         });
