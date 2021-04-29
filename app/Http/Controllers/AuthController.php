@@ -60,10 +60,11 @@ class AuthController extends Controller
             'token' => 'string|max:255',
         ]);
 
-        DB::table('fcm_tokens')->insert([
+        // if fcm token for current access token exists -> update else create new
+        DB::table('fcm_tokens')->upsert([
             'fcm_token' => $request->token,
             'personal_access_token_id' => auth()->user()->currentAccessToken()->id
-        ]);
+        ], ['personal_access_token_id'], ['fcm_token']);
 
         return response()->json(null, 204);
     }

@@ -51,5 +51,4 @@ class User extends Authenticatable
         return $this->tokens()
             ->join('fcm_tokens', 'fcm_tokens.personal_access_token_id', '=', 'personal_access_tokens.id');
     }
-
 }
