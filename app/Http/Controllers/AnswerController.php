@@ -22,6 +22,23 @@ class AnswerController extends Controller
         $this->imageService = $imageService;
     }
 
+    public function show($id) {
+        $answer = Answer::with([
+                'author' => function($query) {
+                    return $query->select('id', 'name');
+                },
+                'images',
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if(!$answer) {
+            return response()->json(['message' => 'Answer with id ' . $id . ' does not exist.'], 404);
+        }
+
+        return response()->json($answer, 200);
+    }
+
     public function store(AnswerPostRequest $request, $id) {
         // when there is no question with given id
         // return message with status code 404

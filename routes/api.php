@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']); // DONE
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    
+
     Route::group(['prefix' => 'questions'], function () {
         Route::get('/', [QuestionController::class, 'index']); // DONE
         Route::post('/', [QuestionController::class, 'store']); // DONE
@@ -38,6 +38,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     Route::group(['prefix' => 'answers'], function () {
+        Route::get('{id}', [AnswerController::class, 'show']); // DONE
         Route::get('{id}/edit-form/', [AnswerController::class, 'edit']); // DONE
         Route::put('{id}/', [AnswerController::class, 'update']);   // DONE
         Route::delete('{id}/', [AnswerController::class, 'destroy']);   // DONE
