@@ -61,10 +61,9 @@ class AuthController extends Controller
         ]);
 
         // if fcm token for current access token exists -> update else create new
-        DB::table('fcm_tokens')->upsert([
-            'fcm_token' => $request->token,
+        DB::table('fcm_tokens')->updateOrInsert([
             'personal_access_token_id' => auth()->user()->currentAccessToken()->id
-        ], ['personal_access_token_id'], ['fcm_token']);
+        ], ['fcm_token' => $request->token]);
 
         return response()->json(null, 204);
     }
