@@ -39,7 +39,6 @@ class AnswerController extends Controller
                             'user_id' => auth()->id(),
                         ]);
 
-            Log::debug($answer->question->id);
             // save images to DB
             foreach((array)$request->file('images') as $uploadedImage) {
                 $imageId = $this->imageService->store($uploadedImage);
@@ -52,6 +51,8 @@ class AnswerController extends Controller
         if($answer->question->author->id != auth()->id()) {
             AnswerCreated::dispatch($answer);
         }
+
+        Log::debug("Answer controller - answer creaetd");
 
         return response()->json(['id' => $answer->id], 201);
     }

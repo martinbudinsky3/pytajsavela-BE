@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -47,13 +48,12 @@ class AuthController extends Controller
 
     public function logout()
     {
-        Log::debug(auth()->user()->currentAccessToken()->id);
         auth()->user()->currentAccessToken()->delete();
 
         return response()->json(null, 204);
     }
 
-    public function storeFcm(Request $request) 
+    public function storeFcm(Request $request)
     {
         // input validation
         $request->validate([
@@ -61,10 +61,10 @@ class AuthController extends Controller
         ]);
 
         DB::table('fcm_tokens')->insert([
-            'token' => $request->token,
+            'fcm_token' => $request->token,
             'personal_access_token_id' => auth()->user()->currentAccessToken()->id
         ]);
-        
+
         return response()->json(null, 204);
     }
 }

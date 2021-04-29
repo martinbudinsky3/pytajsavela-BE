@@ -6,7 +6,7 @@ use App\Models\User;
 
 trait SendsNotifications
 {
-    private function sendNotificationToUser(User $user, $title, $body, $data=null)
+    private function sendNotificationToUser(User $user, $data=null)
     {
         $url = env('FCM_URL');
         $fcmTokens = $user->fcmTokens()->pluck('fcm_token');
@@ -14,10 +14,6 @@ trait SendsNotifications
 
         $notificationData = [
             "registration_ids" => $fcmTokens,
-            "notification" => [
-                "title" => $title,
-                "body" => $body,
-            ],
             "data" => $data
         ];
         $encodedData = json_encode($notificationData);
@@ -42,14 +38,7 @@ trait SendsNotifications
         // Execute post
         $result = curl_exec($ch);
 
-        if ($result === FALSE) {
-            die('Curl failed: ' . curl_error($ch));
-        }
-
         // Close connection
         curl_close($ch);
-
-        // FCM response
-        dd($result);
     }
 }

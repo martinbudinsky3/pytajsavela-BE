@@ -29,13 +29,11 @@ class SendAnswerNotification
      */
     public function handle(AnswerCreated $event)
     {
-        Log::debug($event->answer);
-        $questionAuthor = $event->answer->question->author;
         $this->sendNotificationToUser(
-            $questionAuthor,
-            "Nová odpoveď",
-            $questionAuthor->name." pridal odpoveď na vašu otázku",
+            $event->answer->question->author,
             [
+                "title" => "Nová odpoveď",
+                "body" => "Používateľ " . $event->answer->author->name . " pridal odpoveď na vašu otázku",
                 "answer_id" => $event->answer->id,
                 "question_id" =>  $event->answer->question->id
             ]
